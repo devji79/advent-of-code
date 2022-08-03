@@ -35,22 +35,7 @@ public class RouteFinder : IRouteFinder
     {
         if (index >= _locations.Count)
         {
-            if (IsRouteValid())
-            {
-                var distance = CalculateDistance();
-                //Console.WriteLine("Solution found: " + string.Join(" -> ", _route) + " . Distance: " + distance);
-                
-                if (distance > 0 && (_minimumDistance == 0 || distance < _minimumDistance))
-                {
-                    _minimumDistance = distance;
-                }
-
-                if (distance > _maximumDistance)
-                {
-                    _maximumDistance = distance;
-                }
-            }
-            
+            CheckSolution();
             return;
         } 
             
@@ -63,10 +48,12 @@ public class RouteFinder : IRouteFinder
             }
             else
             {
+                // Backtrack for an invalid move
                 _route[index] = null;
             }
         }
         
+        // Backtrack when all options exhausted
         _route[index] = null;
     }
 
@@ -75,11 +62,6 @@ public class RouteFinder : IRouteFinder
         var allLocationsInRoute = _route.Where(l => l != null).ToList();
         var distinctLocationsInRoute = allLocationsInRoute.Distinct().ToList();
         return allLocationsInRoute.Count == distinctLocationsInRoute.Count();
-    }
-    
-    private bool IsRouteValid()
-    {
-        return _locations.All(l => _route.Contains(l));
     }
 
     private int CalculateDistance()
@@ -98,6 +80,26 @@ public class RouteFinder : IRouteFinder
         }
 
         return distance;
+    }
+
+    private void CheckSolution()
+    {
+        var routeIsValid = _locations.All(l => _route.Contains(l));
+        if (routeIsValid)
+        {
+            var distance = CalculateDistance();
+            //Console.WriteLine("Solution found: " + string.Join(" -> ", _route) + " . Distance: " + distance);
+                
+            if (distance > 0 && (_minimumDistance == 0 || distance < _minimumDistance))
+            {
+                _minimumDistance = distance;
+            }
+
+            if (distance > _maximumDistance)
+            {
+                _maximumDistance = distance;
+            }
+        }
     }
 
     public int GetMinimumDistance()
